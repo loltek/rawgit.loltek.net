@@ -18,7 +18,6 @@ if(0!==strpos($url,"/https://raw.githubusercontent.com")){
     return;
 }
 $url=substr($url,1);
-http_response_code(200);
 $lowercase_type=explode(".",basename($url));
 $lowercase_type=strtolower($lowercase_type[array_key_last($lowercase_type)]);
 // var_dump("url",$url,"_GET",$_GET,"_POST",$_POST,"_REQUEST",$_REQUEST,"_SERVER",$_SERVER);
@@ -29,7 +28,6 @@ $redirect_header='X-Accel-Redirect: /githubusercontent_proxy/'.urlencode($url);
 if(0){
     var_dump($redirect_header);
 }else{
-    http_response_code(200);
     //header("");
     header("Content-Type: ".fileContentType($lowercase_type));
     header($redirect_header);
@@ -42,6 +40,7 @@ function showMainPage(){
     echo "https://rawgit.loltek.net/";
     echo "\n\nexample:\nto get: https://raw.githubusercontent.com/divinity76/intel-cpu-database/master/databases/intel_cpu_database.json \ngo to:  https://rawgit.loltek.net/https://raw.githubusercontent.com/divinity76/intel-cpu-database/master/databases/intel_cpu_database.json";
     echo "\n\n\n";
+    echo "github repo (bugs/development/blahblah): https://github.com/loltek/rawgit.loltek.net";
     echo "nginx config for this script: \n";
     readfile("/etc/nginx/sites-enabled/rawgit.loltek.net");
     echo "\nsource code for this script: \n\n\n";
