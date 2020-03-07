@@ -1,0 +1,37 @@
+server {
+	listen 80;
+	listen [::]:80;
+	root /srv/http/rawgit.loltek.net/www;
+	#autoindex on;
+	index script.php;
+	server_name rawgit.loltek.net;
+	location / {
+		try_files $uri $uri/ =404;
+		#try_files $uri $uri/ /script.php$is_args$args;
+		#try_files "" /script.php$is_args$args;
+	}
+	error_page 404 =200 /script.php;
+	# https://www.mediasuite.co.nz/blog/proxying-s3-downloads-nginx/
+	location ~ ^/githubusercontent_proxy/(.+) {
+		internal;
+		resolver 8.8.8.8 ipv6=off;
+		set $proxy_url $1;
+		proxy_set_header Host 'raw.githubusercontent.com';
+		proxy_set_header Authorization '';
+		proxy_set_header Cookie '';
+		proxy_hide_header 'Content-Type';
+		proxy_intercept_errors on;
+		proxy_pass $proxy_url$is_args$args;
+	}
+	# pass PHP scripts to FastCGI server
+	location ~ \.php$ {
+		include snippets/fastcgi-php.conf;
+		fastcgi_pass unix:/run/php/php7.3-fpm.sock;
+	}
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/rawgit.loltek.net/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/rawgit.loltek.net/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
