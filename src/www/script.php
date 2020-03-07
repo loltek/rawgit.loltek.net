@@ -38,7 +38,7 @@ function showMainPage(){
     echo "hi!\n";
     echo "add your raw.githubusercontent.com link to the end of the url:\n";
     echo "https://rawgit.loltek.net/";
-    echo "\n\nexample:\nto get: https://raw.githubusercontent.com/divinity76/intel-cpu-database/master/databases/intel_cpu_database.json \ngo to:  https://rawgit.loltek.net/https://raw.githubusercontent.com/divinity76/intel-cpu-database/master/databases/intel_cpu_database.json";
+    echo "\n\nexample:\nto get: https://raw.githubusercontent.com/loltek/rawgit.loltek.net/master/src/www/script.php \ngo to:  https://rawgit.loltek.net/https://raw.githubusercontent.com/loltek/rawgit.loltek.net/master/src/www/script.php";
     echo "\n\n\n";
     echo "github repo (bugs/development/blahblah): https://github.com/loltek/rawgit.loltek.net\n";
     echo "nginx config for this script: \n";
