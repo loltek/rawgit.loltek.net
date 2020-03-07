@@ -40,7 +40,7 @@ function showMainPage(){
     echo "https://rawgit.loltek.net/";
     echo "\n\nexample:\nto get: https://raw.githubusercontent.com/divinity76/intel-cpu-database/master/databases/intel_cpu_database.json \ngo to:  https://rawgit.loltek.net/https://raw.githubusercontent.com/divinity76/intel-cpu-database/master/databases/intel_cpu_database.json";
     echo "\n\n\n";
-    echo "github repo (bugs/development/blahblah): https://github.com/loltek/rawgit.loltek.net";
+    echo "github repo (bugs/development/blahblah): https://github.com/loltek/rawgit.loltek.net\n";
     echo "nginx config for this script: \n";
     readfile("/etc/nginx/sites-enabled/rawgit.loltek.net");
     echo "\nsource code for this script: \n\n\n";
