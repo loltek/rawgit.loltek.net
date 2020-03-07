@@ -6,11 +6,12 @@ server {
 	index script.php;
 	server_name rawgit.loltek.net;
 	location / {
-		try_files $uri $uri/ =404;
-		#try_files $uri $uri/ /script.php$is_args$args;
+		#try_files $uri $uri/ =404;
+		try_files $uri $uri/ /script.php$is_args$args;
 		#try_files "" /script.php$is_args$args;
 	}
-	error_page 404 =200 /script.php;
+
+	#error_page 404 =200 /script.php;
 	# https://www.mediasuite.co.nz/blog/proxying-s3-downloads-nginx/
 	location ~ ^/githubusercontent_proxy/(.+) {
 		internal;
@@ -20,12 +21,78 @@ server {
 		proxy_set_header Authorization '';
 		proxy_set_header Cookie '';
 		proxy_hide_header 'Content-Type';
-		proxy_intercept_errors on;
+		#proxy_hide_header 'Content-Disposition';
+		proxy_hide_header 'Connection';
+		#proxy_intercept_errors on;
 		proxy_pass $proxy_url$is_args$args;
 	}
 	# pass PHP scripts to FastCGI server
+	#location ~ \.php$ {
+	#	include snippets/fastcgi-php.conf;
+	#	index script.php;
+	#	fastcgi_param  SCRIPT_FILENAME    $document_root/script.php;
+	#	fastcgi_param  SCRIPT_NAME        /script.php;
+	#	fastcgi_index script.php;
+	#	fastcgi_pass unix:/run/php/php7.3-fpm.sock;
+	#}
+	# this clusterfuck seems to be needed to make it always redirect to script.php with proxying response code
+	# if i use >>>try_files "" /script.php;<<<  then it won't proxy github .php files,
+	# if i use >>>try_files $uri $uri/ =404; error_page 404 /script.php<<<  then it won't properly proxy github 304 Not Modified, always saying 404 instead of 200/304/etc
+	# if i use >>>try_files $uri $uri/ =404; error_page 404 =200 /script.php<<<  then it won't proxy 304 Not Modified/404, always saying HTTP 200 
 	location ~ \.php$ {
-		include snippets/fastcgi-php.conf;
+		index script.php;
+		#include snippets/fastcgi-php.conf;
+
+		#<snippets/fastcgi-php.conf>
+		# regex to split $uri to $fastcgi_script_name and $fastcgi_path
+		fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+		#set $fastcgi_script_name "/script.php";
+		#return 200 "fastcgi_script_name: $fastcgi_script_name - fastcgi_path: $fastcgi_path";
+		#return 200 "fastcgi_script_name: $fastcgi_script_name - fastcgi_path: (borked)";
+
+		# Check that the PHP script exists before passing it
+		#try_files $fastcgi_script_name =404;
+		#try_files "" /script.php;
+		# Bypass the fact that try_files resets $fastcgi_path_info
+		# see: http://trac.nginx.org/nginx/ticket/321
+		set $path_info $fastcgi_path_info;
+		fastcgi_param PATH_INFO $path_info;
+		#return 200 "path_info: $path_info";
+
+		fastcgi_index script.php;
+		#include fastcgi.conf;
+		#<fastcgi.conf>
+		######fastcgi_param  SCRIPT_FILENAME    $document_root$fastcgi_script_name;
+		fastcgi_param  SCRIPT_FILENAME    $document_root/script.php;
+		#return 200 "SCRIPT_FILENAME: $document_root$fastcgi_script_name";
+
+		fastcgi_param  QUERY_STRING       $query_string;
+		fastcgi_param  REQUEST_METHOD     $request_method;
+		fastcgi_param  CONTENT_TYPE       $content_type;
+		fastcgi_param  CONTENT_LENGTH     $content_length;
+		
+		#######fastcgi_param  SCRIPT_NAME        $fastcgi_script_name;
+		fastcgi_param  SCRIPT_NAME        /script.php;
+		#return 200 "fastcgi_script_name: $fastcgi_script_name";
+		fastcgi_param  REQUEST_URI        $request_uri;
+		fastcgi_param  DOCUMENT_URI       $document_uri;
+		fastcgi_param  DOCUMENT_ROOT      $document_root;
+		fastcgi_param  SERVER_PROTOCOL    $server_protocol;
+		fastcgi_param  REQUEST_SCHEME     $scheme;
+		fastcgi_param  HTTPS              $https if_not_empty;
+
+		fastcgi_param  GATEWAY_INTERFACE  CGI/1.1;
+		fastcgi_param  SERVER_SOFTWARE    nginx/$nginx_version;
+		
+		fastcgi_param  REMOTE_ADDR        $remote_addr;
+		fastcgi_param  REMOTE_PORT        $remote_port;
+		fastcgi_param  SERVER_ADDR        $server_addr;
+		fastcgi_param  SERVER_PORT        $server_port;
+		fastcgi_param  SERVER_NAME        $server_name;
+		# PHP only, required if PHP was built with --enable-force-cgi-redirect
+		fastcgi_param  REDIRECT_STATUS    200;
+		#</fastcgi.conf>
+		#</snippets/fastcgi-php.conf>
 		fastcgi_pass unix:/run/php/php7.3-fpm.sock;
 	}
     listen [::]:443 ssl; # managed by Certbot
