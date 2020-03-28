@@ -13,7 +13,7 @@ if($url==="/favicon.ico"){
     http_response_code(404);
     return;
 }
-if(0!==strpos($url,"/https://raw.githubusercontent.com")){
+if(0!==strpos($url,"/https://raw.githubusercontent.com/")){
     showMainPage();
     return;
 }
