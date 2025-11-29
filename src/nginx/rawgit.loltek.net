@@ -34,7 +34,7 @@ server {
 	#	fastcgi_param  SCRIPT_FILENAME    $document_root/script.php;
 	#	fastcgi_param  SCRIPT_NAME        /script.php;
 	#	fastcgi_index script.php;
-	#	fastcgi_pass unix:/run/php/php7.3-fpm.sock;
+	#	fastcgi_pass unix:/run/php/php8.3-fpm.sock;
 	#}
 	# this clusterfuck seems to be needed to make it always redirect to script.php with proxying response code
 	# if i use >>>try_files "" /script.php;<<<  then it won't proxy github .php files,
@@ -94,7 +94,7 @@ server {
 		fastcgi_param  REDIRECT_STATUS    200;
 		#</fastcgi.conf>
 		#</snippets/fastcgi-php.conf>
-		fastcgi_pass unix:/run/php/php7.3-fpm.sock;
+		fastcgi_pass unix:/run/php/php8.3-fpm.sock;
 	}
     listen [::]:443 ssl; # managed by Certbot
     listen 443 ssl; # managed by Certbot
