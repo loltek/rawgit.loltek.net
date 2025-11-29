@@ -18,12 +18,22 @@ if(0!==strpos($url,"/https://raw.githubusercontent.com/")){
     return;
 }
 $url=substr($url,1);
-$lowercase_type=explode(".",basename($url));
-$lowercase_type=strtolower($lowercase_type[array_key_last($lowercase_type)]);
+$query_string='';
+$question_pos=strpos($url,'?');
+if($question_pos!==false){
+    $query_string=substr($url,$question_pos+1);
+    $url=substr($url,0,$question_pos);
+}
+$path_component=parse_url($url,PHP_URL_PATH) ?? '';
+$lowercase_type=strtolower(pathinfo($path_component,PATHINFO_EXTENSION) ?? '');
 // var_dump("url",$url,"_GET",$_GET,"_POST",$_POST,"_REQUEST",$_REQUEST,"_SERVER",$_SERVER);
 //var_dump($url);
 // 
-$redirect_header='X-Accel-Redirect: /githubusercontent_proxy/'.urlencode($url);
+$redirect_target='/githubusercontent_proxy/'.urlencode($url);
+if($query_string!==''){
+    $redirect_target.='?'.$query_string;
+}
+$redirect_header='X-Accel-Redirect: '.$redirect_target;
 //$redirect_header='X-Accel-Redirect: /githubusercontent_proxy/'.$url;
 if(0){
     var_dump($redirect_header);
